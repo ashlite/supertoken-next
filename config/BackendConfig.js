@@ -10,8 +10,8 @@ export function backendConfig(){
   return {
     framework: "express",
     supertokens: {
-      connectionURI: "https://185b8161eb9411eca72be755308ae527-us-east-1.aws.supertokens.io:3568",
-      apiKey: "8Wn0rGPVaZVQcWV34vGvdSfs7k9HHt",
+      connectionURI: process.env.SUPER_TOKEN_CONNECTION_URI,
+      apiKey: process.env.SUPER_TOKEN_API_KEY,
     },
     appInfo,
     recipeList: [
@@ -36,13 +36,13 @@ export function backendConfig(){
         },
         providers: [
           ThirdPartyEmailPasswordNode.Google({
-            clientId: "779912293360-3d9fghepkse27c8sg7mp8cmb6l8irgfn.apps.googleusercontent.com",
-            clientSecret: "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",
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_SECRET,
             scope:["profile", "email"]
           }),
           ThirdPartyEmailPasswordNode.Facebook({
-            clientSecret: "12ddeee5ae56a0377da9f33c92a39e68",
-            clientId: "1116382709219370",
+            clientSecret: process.env.FACEBOOK_SECRET,
+            clientId: process.env.FACEBOOK_CLIENT_ID,
             scope:["public_profile", "email"]
           }),
         ],
