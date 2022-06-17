@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model login {
+  id            BigInt    @id @default(autoincrement())
+  loginAt       DateTime  @default(now()) @db.Timestamp(6) @map("login_at")
+  superTokenId  String?   @map("user_st_id")
+  user          user?     @relation(fields: [superTokenId], references: [superTokenId], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model session {
+  id            BigInt    @id @default(autoincrement())
+  sessionStart  DateTime? @default(now()) @db.Timestamp(6) @map("session_start")
+  sessionEnd    DateTime? @default(now()) @db.Timestamp(6) @map("session_end")
+  superTokenId  String?   @map("user_st_id")
+  user          user?     @relation(fields: [superTokenId], references: [superTokenId], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model user {
+  id            BigInt    @id @default(autoincrement())
+  name          String?   @db.VarChar(255)
+  email         String    @unique @db.VarChar(255)
+  signUpAt      DateTime  @default(now()) @db.Timestamp(6) @map("sign_up_at")
+  superTokenId  String?   @unique @db.Char(36) @map("id_supertoken")
+  login         login[]
+  session       session[]
+}

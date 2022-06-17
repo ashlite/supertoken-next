@@ -1,9 +1,10 @@
+import React, { useEffect } from 'react'
 import ThirdPartyEmailPasswordReact from 'supertokens-auth-react/recipe/thirdpartyemailpassword'
 import SessionReact from 'supertokens-auth-react/recipe/session'
 import { appInfo } from './AppInfo'
-import PasswordValidation from '../component/PasswordValidation'
 
 export function frontendConfig(){
+  
   return {
     appInfo,
     recipeList: [
@@ -22,7 +23,12 @@ export function frontendConfig(){
               label: "Password",
               
               validate: async(value) => {
-                PasswordValidation(value)
+                const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/
+                if (regex.test(value)) {
+                  return undefined
+                } else {
+                  return 'Password must be 8-20 characters long, contain at least one number, one uppercase letter, one lowercase letter, and one special character'
+                }
               }
             }, {
               id: "passwordConfirm",
@@ -30,7 +36,7 @@ export function frontendConfig(){
               placeholder: "Please input your password again",
 
               validate: async(value) => {
-                if (value !== password) {
+                if (value !== document.querySelector("#supertokens-root").shadowRoot.querySelector('input[name="password"]').value) {
                   return "Password does not match"
                 }
                 return undefined
@@ -42,12 +48,26 @@ export function frontendConfig(){
             }]
           }
         },
+        override:{
+          components:{
+            EmailPasswordSignUpForm_Override:({DefaultComponent, ...props}) => {
+              useEffect(() => {
+                let passwordConfirm = document.querySelector("#supertokens-root").shadowRoot.querySelector('input[name="passwordConfirm"]')
+                console.log(passwordConfirm) //for checking purpose
+                if (passwordConfirm){
+                  passwordConfirm.setAttribute("type", "password")
+                }
+              }, [])
+              return <DefaultComponent {...props} />
+            }
+          }
+        },
         getRedirectionURL: async (context) => {
           if (context.action === "SUCCESS") {
               return "/dashboard";
           }
           return undefined;
-      }
+        },
       }),
       SessionReact.init(),
     ],

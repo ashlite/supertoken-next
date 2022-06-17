@@ -1,12 +1,13 @@
-import Guard from '../../component/Guard'
+import React from 'react'
+import AuthWrapper from '../../component/AuthWrapper' 
 import { Box, Heading } from '@chakra-ui/react'
 
 export default function Dashboard() {
   return (
-    <Guard>
+    <AuthWrapper>
       <Box>
         <Heading>Dashboard</Heading>
       </Box>
-    </Guard>
+    </AuthWrapper>
   )
 }
