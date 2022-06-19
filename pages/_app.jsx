@@ -3,6 +3,7 @@ import React from 'react'
 import SuperTokensReact from 'supertokens-auth-react'
 import { frontendConfig } from '../config/FrontendConfig'
 import Layout from '../component/Layout'
+import theme from '../config/ChakraConfig'
 
 if (typeof window !== 'undefined') {
   SuperTokensReact.init(frontendConfig())
@@ -10,7 +11,7 @@ if (typeof window !== 'undefined') {
 
 function MyApp({ Component, pageProps }) {
   return (
-    <ChakraProvider>
+    <ChakraProvider theme={theme}>
       <Layout>
         <Component {...pageProps} />
       </Layout>
