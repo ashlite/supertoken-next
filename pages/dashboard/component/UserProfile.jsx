@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState } from 'react'
 import { useSessionContext } from 'supertokens-auth-react/recipe/session'
 import { 
   Flex, 
@@ -16,8 +16,11 @@ import {
   Input,
   Spinner,
   useToast,
-} from "@chakra-ui/react"
-import axios from "axios"
+} from '@chakra-ui/react'
+import axios from 'axios'
+import Session from 'supertokens-auth-react/recipe/session'
+
+Session.addAxiosInterceptors(axios)
 
 export default function UserProfile() {
   let sessionContext = useSessionContext()
@@ -32,14 +35,13 @@ export default function UserProfile() {
       userName: newUserName
     })
     .then(res => {
-      console.log(res)
       setNewUserName('')
       setProcessingRequest(false)
       onClose()
       if (res.status === 200){
         toast({
           title: 'Successfully updated username',
-          description: "Please relogin to see the changes",
+          description: 'Please relogin to see the changes',
           status: 'success',
           duration: 9000,
           isClosable: true,
@@ -50,7 +52,6 @@ export default function UserProfile() {
           status: 'danger',
           isClosable: true,
         })
-        console.log(res)
       }
     })
     .catch(err => {console.log(err)})
@@ -72,7 +73,7 @@ export default function UserProfile() {
       <ModalContent>
         <ModalHeader>Change your username</ModalHeader>
         {processingRequest ? 
-          <Spinner size='xl' mx="auto" my={4} />
+          <Spinner size="xl" mx="auto" my={4} />
         :
           <>
           <ModalBody>

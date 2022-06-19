@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react"
-import axios from "axios"
+import React, { useEffect, useState } from 'react'
+import axios from 'axios'
+import Session from 'supertokens-auth-react/recipe/session'
 import { 
   Box,
   Flex,
@@ -15,14 +16,15 @@ import {
   Td,
   TableContainer,
   Heading,
-} from "@chakra-ui/react"
+} from '@chakra-ui/react'
+
+Session.addAxiosInterceptors(axios)
 
 export default function AllUserData(){
   const [data, setData] = useState()
   useEffect(() => {
     axios.get(`api/user`)
     .then(res => {
-      console.log(res.data)
       setData(res.data)
     })
     .catch(err => console.log(err))
@@ -38,17 +40,17 @@ export default function AllUserData(){
           <StatNumber>{data ? data.userCount : "Loading..."}</StatNumber>
         </Stat>
         <Stat>
-          <StatLabel>Total Today Sessions</StatLabel>
-          <StatNumber>100</StatNumber>
+          <StatLabel>Today Active Sessions</StatLabel>
+          <StatNumber>{data ? data.todaySession : "Loading..."}</StatNumber>
         </Stat>
         <Stat>
-          <StatLabel>Average Active Session</StatLabel>
-          <StatNumber>100</StatNumber>
+          <StatLabel>Average Active User</StatLabel>
+          <StatNumber>{data ? data.lastWeekSession : "Loading..."}</StatNumber>
           <StatHelpText>Last 7 days</StatHelpText>
         </Stat>
       </Flex>
       <TableContainer>
-        <Table variant='striped'>
+        <Table variant="striped">
           <Thead>
             <Tr>
               <Th>Email</Th>
@@ -61,8 +63,8 @@ export default function AllUserData(){
             {data && data.users.map((user, index) =>
               <Tr key={index}>
                 <Td>{user.email}</Td>
-                <Td>{new Date(user.timeJoined).toLocaleDateString('en-US') }</Td>
-                <Td>millimetres (mm)</Td>
+                <Td>{new Date(user.timeJoined).toLocaleDateString()}</Td>
+                <Td>{new Date(user.lastSession.createAt).toLocaleDateString()}</Td>
                 <Td isNumeric>{user.totalLogin}</Td>
               </Tr>
             )}

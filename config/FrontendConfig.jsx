@@ -3,6 +3,9 @@ import ThirdPartyEmailPasswordReact from 'supertokens-auth-react/recipe/thirdpar
 import SessionReact from 'supertokens-auth-react/recipe/session'
 import { appInfo } from './AppInfo'
 import axios from 'axios'
+import Session from 'supertokens-auth-react/recipe/session'
+
+Session.addAxiosInterceptors(axios)
 
 export function frontendConfig(){
   
@@ -11,7 +14,7 @@ export function frontendConfig(){
     recipeList: [
       ThirdPartyEmailPasswordReact.init({
         emailVerificationFeature: {
-          mode: "REQUIRED"
+          mode: 'REQUIRED'
          },
         signInAndUpFeature: {
           providers: [
@@ -20,32 +23,32 @@ export function frontendConfig(){
           ],
           signUpForm: {
             formFields: [{
-              id: "password",
-              label: "Password",
+              id: 'password',
+              label: 'Password',
               
               validate: async(value) => {
-                const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/
+                const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$!%*^?&])[A-Za-z\d@#$!%*^?&]{8,20}$/
                 if (regex.test(value)) {
                   return undefined
                 } else {
-                  return 'Password must be 8-20 characters long, contain at least one number, one uppercase letter, one lowercase letter, and one special character'
+                  return 'Password must be 8-20 characters long, contain at least one number, one uppercase letter, one lowercase letter, and one special character (@#$!%*^?&)'
                 }
               }
             }, {
-              id: "passwordConfirm",
-              label: "Confirm your Password",
-              placeholder: "Please input your password again",
+              id: 'passwordConfirm',
+              label: 'Confirm your Password',
+              placeholder: 'Please input your password again',
 
               validate: async(value) => {
-                if (value !== document.querySelector("#supertokens-root").shadowRoot.querySelector('input[name="password"]').value) {
-                  return "Password does not match"
+                if (value !== document.querySelector('#supertokens-root').shadowRoot.querySelector('input[name="password"]').value) {
+                  return 'Password does not match'
                 }
                 return undefined
               }
             }, { 
-              id: "name",
-              label: "Full Name",
-              placeholder: "First name and last name",
+              id: 'name',
+              label: 'Full Name',
+              placeholder: 'First name and last name',
             }]
           }
         },
@@ -53,10 +56,9 @@ export function frontendConfig(){
           components:{
             EmailPasswordSignUpForm_Override:({DefaultComponent, ...props}) => {
               useEffect(() => {
-                let passwordConfirm = document.querySelector("#supertokens-root").shadowRoot.querySelector('input[name="passwordConfirm"]')
-                console.log(passwordConfirm) //for checking purpose
+                let passwordConfirm = document.querySelector('#supertokens-root').shadowRoot.querySelector('input[name="passwordConfirm"]')
                 if (passwordConfirm){
-                  passwordConfirm.setAttribute("type", "password")
+                  passwordConfirm.setAttribute('type', 'password')
                 }
               }, [])
               return <DefaultComponent {...props} />
@@ -64,19 +66,11 @@ export function frontendConfig(){
           }
         },
         getRedirectionURL: async (context) => {
-          if (context.action === "SUCCESS") {
-              return "/dashboard";
+          if (context.action === 'SUCCESS') {
+              return '/dashboard';
           }
           return undefined;
         },
-        onHandleEvent: async (context) => {
-          if (context.action === "SUCCESS" || context.action === "SESSION_ALREADY_EXISTS") {
-            await axios.post(`api/user/${context.user.id}`, {
-              key: "session"
-            })
-          }
-          
-        }
       }),
       SessionReact.init(),
     ],

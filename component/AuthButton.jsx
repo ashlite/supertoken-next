@@ -1,18 +1,22 @@
-import React from "react"
-import { signOut } from "supertokens-auth-react/recipe/thirdpartyemailpassword"
+import React from 'react'
 import { useRouter } from 'next/router'
 import { useSessionContext } from 'supertokens-auth-react/recipe/session'
 import { Button } from '@chakra-ui/react'
+import axios from 'axios'
+import Session from 'supertokens-auth-react/recipe/session'
+
+Session.addAxiosInterceptors(axios)
 
 export default function AuthButton(){
   let {doesSessionExist} = useSessionContext()
   const router = useRouter()
 
-  function logout(e) {
+  async function logout(e) {
     e.preventDefault()
-    signOut().then(() => {
+    try{
+      await axios.post('/api/logout')
       router.push('/')
-    })
+    } catch(err){console.log(err)}
   }
   
   function login(e){

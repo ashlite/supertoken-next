@@ -1,9 +1,11 @@
-import React from "react"
+import React from 'react'
 import { useSessionContext } from 'supertokens-auth-react/recipe/session'
-import { Button } from "@chakra-ui/react"
+import { Button } from '@chakra-ui/react'
 import { useRouter } from 'next/router'
-import { signOut } from "supertokens-auth-react/recipe/thirdpartyemailpassword"
-import axios from "axios"
+import axios from 'axios'
+import Session from 'supertokens-auth-react/recipe/session'
+
+Session.addAxiosInterceptors(axios)
 
 export default function DestroyButton(){
   let {doesSessionExist, userId} = useSessionContext()
@@ -12,13 +14,7 @@ export default function DestroyButton(){
   async function destroy(e){
     e.preventDefault()
     const url = `/api/user/${userId}`
-    await fetch(url, {
-      method:'DELETE',
-      headers:{
-        'Content-Type': 'application/json'
-      }
-    })
-    await signOut()
+    await axios.delete(url)
     router.push('/')
   }
 

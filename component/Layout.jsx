@@ -1,10 +1,10 @@
-import React from "react"
-import { Box, Grid, GridItem, Text, Button } from "@chakra-ui/react"
-import AuthButton from "./AuthButton"
-import AuthWrapper from "./AuthWrapper"
-import DestroyButton from "../component/DestroyButton"
-import { SessionAuth } from "supertokens-auth-react/recipe/session"
-import dynamic from "next/dynamic"
+import React from 'react'
+import { Box, Grid, GridItem, Text, Button } from '@chakra-ui/react'
+import AuthButton from './AuthButton'
+import AuthWrapper from './AuthWrapper'
+import DestroyButton from '../component/DestroyButton'
+import { SessionAuth } from 'supertokens-auth-react/recipe/session'
+import dynamic from 'next/dynamic'
 
 const SessionAuthNoSSR = dynamic(
   new Promise((res) => {

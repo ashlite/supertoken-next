@@ -1,8 +1,9 @@
-import { superTokensNextWrapper } from "supertokens-node/nextjs"
-import { verifySession } from "supertokens-node/recipe/session/framework/express"
-import { getUsersNewestFirst, getUserCount } from "supertokens-node"
-import Session from "supertokens-node/recipe/session"
-import UserMetadata from "supertokens-node/recipe/usermetadata"
+import { superTokensNextWrapper } from 'supertokens-node/nextjs'
+import { verifySession } from 'supertokens-node/recipe/session/framework/express'
+import { getUsersNewestFirst, getUserCount } from 'supertokens-node'
+import Session from 'supertokens-node/recipe/session'
+import UserMetadata from 'supertokens-node/recipe/usermetadata'
+import Prisma from '../../../config/Prisma'
 
 export default async function handler(req,res){
   await superTokensNextWrapper(
@@ -18,6 +19,17 @@ export default async function handler(req,res){
       limit:200,
     })    
     const users = []
+    var todaySession = 0
+
+    const lastWeekSession = await Prisma.session.count({
+      where: {
+        createAt:{
+          gte: new Date(Date.now() - 7*24*60*60*1000),
+          lte: new Date()
+        }
+      }
+    })
+
     for (let user of usersResponse.users){
       const result ={}
       const { metadata } = await UserMetadata.getUserMetadata(user.user.id)
@@ -27,14 +39,16 @@ export default async function handler(req,res){
       result.userName = metadata.userName
       result.totalLogin = metadata.totalLogin
       result.session = await Session.getAllSessionHandlesForUser(user.user.id)
-      // console.log(result)
       users.push(result)
-      // console.log(users)
+      if (result.session.length > 0){
+        todaySession += 1
+      }
+      result.lastSession = await Prisma.session.findFirst({
+        where:{userId: user.user.id},
+        orderBy: {createAt: 'desc'},
+      })
     }
-
-    console.log(users)
     let userCount = await getUserCount()
-    // let userSession = await Session.getAllSessionHandlesForUser(req.user.id)
-    res.status(200).json({users: users, userCount: userCount})
+    res.status(200).json({users: users, userCount: userCount, todaySession: todaySession, lastWeekSession: lastWeekSession})
   }
 }
