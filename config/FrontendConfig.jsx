@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import ThirdPartyEmailPasswordReact from 'supertokens-auth-react/recipe/thirdpartyemailpassword'
 import SessionReact from 'supertokens-auth-react/recipe/session'
 import { appInfo } from './AppInfo'
+import axios from 'axios'
 
 export function frontendConfig(){
   
@@ -68,6 +69,14 @@ export function frontendConfig(){
           }
           return undefined;
         },
+        onHandleEvent: async (context) => {
+          if (context.action === "SUCCESS" || context.action === "SESSION_ALREADY_EXISTS") {
+            await axios.post(`api/user/${context.user.id}`, {
+              key: "session"
+            })
+          }
+          
+        }
       }),
       SessionReact.init(),
     ],

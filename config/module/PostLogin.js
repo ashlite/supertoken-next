@@ -1,20 +1,10 @@
 import Prisma from "../Prisma"
 import axios from 'axios'
-
+import { RegisterUser, UpsertSession } from "./DBQuery"
 
 export default async function PostLogin(data){
-  let userProfile, dbInput, accessToken, apiResponse
+  let userProfile, dbInput, apiResponse
   console.log(data)
-
-  async function addLoginDB(){
-    try{
-      await Prisma.login.create({
-        data: {
-          superTokenId: data.user.id
-        }
-      })
-    } catch(err) {console.log(err)}
-  }
 
   if (data.createdNewUser) {
 
@@ -37,21 +27,11 @@ export default async function PostLogin(data){
       }
     }
     //Add user to DB
-    try{
-      dbInput = await Prisma.user.create({
-        data: {
-          name: userProfile.name,
-          email: data.user.email,
-          superTokenId: data.user.id,
-          signUpAt: new Date(data.user.timeJoined).toJSON()
-        }
-      })
-    } catch(err) {console.log(err)}
-    addLoginDB()
+    dbInput = await RegisterUser(data.user.id, data.user.email, userProfile.name, data.user.timeJoined)
 
   } else {
     //Add login log in DB
-    await addLoginDB()
+    // await addSessionDB()
     
   }
   return dbInput

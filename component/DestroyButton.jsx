@@ -3,6 +3,7 @@ import { useSessionContext } from 'supertokens-auth-react/recipe/session'
 import { Button } from "@chakra-ui/react"
 import { useRouter } from 'next/router'
 import { signOut } from "supertokens-auth-react/recipe/thirdpartyemailpassword"
+import axios from "axios"
 
 export default function DestroyButton(){
   let {doesSessionExist, userId} = useSessionContext()

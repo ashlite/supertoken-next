@@ -20,6 +20,7 @@ model session {
   sessionEnd    DateTime? @default(now()) @db.Timestamp(6) @map("session_end")
   superTokenId  String?   @map("user_st_id")
   user          user?     @relation(fields: [superTokenId], references: [superTokenId], onDelete: Cascade, onUpdate: NoAction)
+  handleId      String?   @map("handle_id")
 }
 
 model user {

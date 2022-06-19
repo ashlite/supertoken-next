@@ -3,7 +3,15 @@ import { Box, Grid, GridItem, Text, Button } from "@chakra-ui/react"
 import AuthButton from "./AuthButton"
 import AuthWrapper from "./AuthWrapper"
 import DestroyButton from "../component/DestroyButton"
-import SessionAuth from "supertokens-auth-react/recipe/session"
+import { SessionAuth } from "supertokens-auth-react/recipe/session"
+import dynamic from "next/dynamic"
+
+const SessionAuthNoSSR = dynamic(
+  new Promise((res) => {
+    res(SessionAuth)
+  }),
+  {ssr: false}
+)
 
 export default function Layout({ children }) {
   return (
@@ -12,7 +20,7 @@ export default function Layout({ children }) {
           <GridItem w="full">
             <Text textColor="grey.100" fontSize="4xl" >AHA-Test</Text>
           </GridItem>
-          <SessionAuth requireAuth={false}>
+          <SessionAuthNoSSR requireAuth={false}>
             <>
             <GridItem w="full" colStart={4}>
               <DestroyButton />
@@ -21,7 +29,7 @@ export default function Layout({ children }) {
               <AuthButton />
             </GridItem>
             </>
-          </SessionAuth>
+          </SessionAuthNoSSR>
         </Grid>
         {children}
       </Box>

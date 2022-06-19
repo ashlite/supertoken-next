@@ -1,10 +1,9 @@
 import ThirdPartyEmailPasswordNode from 'supertokens-node/recipe/thirdpartyemailpassword'
 import SessionNode from 'supertokens-node/recipe/session'
 import { appInfo } from './AppInfo'
-import { PrismaClient } from '@prisma/client'
-import PostLogin from './module/PostLogin'
-
-const prisma = new PrismaClient()
+import UserMetadata from "supertokens-node/recipe/usermetadata"
+import axios from 'axios'
+import Session from "supertokens-node/recipe/session"
 
 export function backendConfig(){
   return {
@@ -15,6 +14,7 @@ export function backendConfig(){
     },
     appInfo,
     recipeList: [
+      UserMetadata.init(),
       ThirdPartyEmailPasswordNode.init({
         signUpFeature: {
           formFields: [{
@@ -56,11 +56,10 @@ export function backendConfig(){
                     throw Error("Should never come here");
                 }
                 let response = await originalImplementation.emailPasswordSignUpPOST(input);
-                console.log(response)
-                console.log(input)
                 if (response.status === "OK") {
                   // TODO: some post sign up logic
                   // let formFields = input.formFields
+                  await UserMetadata.updateUserMetadata(response.user.id, { userName: input.formFields.name, totalLogin:1 })
                 }
 
                 return response;
@@ -70,13 +69,18 @@ export function backendConfig(){
                 if (originalImplementation.emailPasswordSignInPOST === undefined) {
                   throw Error("Should never come here");
                 }
-
-                // TODO: some pre sign in logic
-
                 let response = await originalImplementation.emailPasswordSignInPOST(input);
-
                 if (response.status === "OK") {
-                    // TODO: some post sign in logic
+                  const {metadata} = await UserMetadata.getUserMetadata(response.user.id)
+                  console.log(metadata)
+                  let userName = metadata.userName
+                  await UserMetadata.updateUserMetadata(response.user.id, { totalLogin: metadata.totalLogin + 1 })
+                  let currTokenPayload = response.session.getAccessTokenPayload()
+                  await response.session.updateAccessTokenPayload({
+                    userName: userName,
+                    email: response.user.email, 
+                    ...currTokenPayload
+                  })
                 }
 
                 return response;
@@ -86,9 +90,45 @@ export function backendConfig(){
                 if (originalImplementation.thirdPartySignInUpPOST === undefined) {
                   throw Error("Should never come here");
                 }
-                let response = await originalImplementation.thirdPartySignInUpPOST(input);
+                
+                let userName, apiResponse
+                let response = await originalImplementation.thirdPartySignInUpPOST(input)
                 if (response.status === "OK") {
-                  await PostLogin(response)                                 
+
+                  if (response.createdNewUser) {
+                    //Get profile from thirdparty
+                    if (response.user.thirdParty.id == "google") {
+                      let url = `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${response.authCodeResponse.access_token}`
+                      try{
+                        apiResponse = await axios.get(url)
+                        userName = apiResponse.data.name
+                      } catch(err){
+                        console.log(err)
+                      }
+                    } else if (response.user.thirdParty.id == "facebook") {
+                      let url = `https://graph.facebook.com/me?access_token=${response.authCodeResponse.access_token}`
+                      try{
+                        apiResponse = await axios.get(url)
+                        userName = apiResponse.data.name
+                      } catch(err){
+                        console.log(err)
+                      }
+                    }
+                    await UserMetadata.updateUserMetadata(response.user.id, { userName: userName, totalLogin:1 })
+                  } else {                                        
+                    const {metadata} = await UserMetadata.getUserMetadata(response.user.id)
+                    console.log(metadata)
+                    userName = metadata.userName
+                    await UserMetadata.updateUserMetadata(response.user.id, { totalLogin: metadata.totalLogin + 1 })
+                  }
+
+                  let currTokenPayload = response.session.getAccessTokenPayload()
+                  await response.session.updateAccessTokenPayload({
+                    userName: userName,
+                    email: response.user.email, 
+                    ...currTokenPayload
+                  })
+                  console.log(response)
                 }
                 return response;
               }
