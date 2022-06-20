@@ -5,6 +5,49 @@ import Session from 'supertokens-node/recipe/session'
 import UserMetadata from 'supertokens-node/recipe/usermetadata'
 import Prisma from '../../../config/Prisma'
 
+/**
+ *  @swagger
+ *  /api/user:
+ *    get:
+ *      summary: Return all users data
+ *      description: Returning all user data and session data without any parameter and request body.
+ *      responses:
+ *        200:
+ *          description: Object users
+ *          content:
+ *            application/json:
+ *              schema: 
+ *                type: object
+ *                properties:
+ *                  users:
+ *                    type: array
+ *                    items:
+ *                      type: object
+ *                      properties:
+ *                        email:
+ *                          type: string
+ *                        id:
+ *                          type: string
+ *                        timeJoined:
+ *                          type: string
+ *                          format: date-time
+ *                        userName:
+ *                          type: string
+ *                        totalLogin:
+ *                          type: integer
+ *                        session:
+ *                          type: string
+ *                        lastSession:
+ *                          type: string
+ *                          format: date-time   
+ *                  userCount:
+ *                    type: integer
+ *                  todaySession:
+ *                    type: integer
+ *                  lastWeekSession:
+ *                    type: integer    
+ */
+
 export default async function handler(req,res){
   await superTokensNextWrapper(
     async (next) => {
@@ -39,7 +82,6 @@ export default async function handler(req,res){
       result.userName = metadata.userName
       result.totalLogin = metadata.totalLogin
       result.session = await Session.getAllSessionHandlesForUser(user.user.id)
-      users.push(result)
       if (result.session.length > 0){
         todaySession += 1
       }
@@ -47,6 +89,7 @@ export default async function handler(req,res){
         where:{userId: user.user.id},
         orderBy: {createAt: 'desc'},
       })
+      users.push(result)
     }
     let userCount = await getUserCount()
     res.status(200).json({users: users, userCount: userCount, todaySession: todaySession, lastWeekSession: lastWeekSession})
